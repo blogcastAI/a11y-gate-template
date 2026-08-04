@@ -1,0 +1,16 @@
+{
+  "name": "a11y-gate-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Template: a merge-blocking accessibility CI gate — axe-core WCAG 2.1 A/AA scans at four viewports plus keyboard operability e2e",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "serve": "node e2e/serve.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.1"
+  }
+}

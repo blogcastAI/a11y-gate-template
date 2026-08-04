@@ -1,0 +1,73 @@
+# =============================================================================
+# a11y-gate — merge-blocking accessibility CI.
+#
+# One job, three layers:
+#   1. (optional, React only) jsx-a11y static lint — catches missing labels,
+#      bad ARIA, and click-without-key handlers at the source level, before a
+#      browser ever starts. Uncomment the lint step and add the eslint config
+#      (see eslint.config.example.mjs).
+#   2. axe-core WCAG 2.1 A/AA scans at four viewports (320px -> 4K).
+#   3. Keyboard operability e2e — traps, focus order, visible focus,
+#      Enter/Space activation.
+#
+# Make it actually block: repo Settings -> Branches -> protect your default
+# branch and mark THIS job as a required status check. A gate that runs but
+# does not block is advisory decoration.
+#
+# Honest limits: automated checks catch only a fraction of WCAG failures.
+# A green run prevents a class of regressions; it does not make your site
+# accessible or conformant, and it is never evidence for a compliance claim.
+# =============================================================================
+name: a11y-gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: a11y gate (axe 4-viewport + keyboard)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: a11y-gate-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # OPTIONAL (React projects): static jsx-a11y lint as the cheap first
+      # layer. Requires eslint + eslint-plugin-jsx-a11y in devDependencies and
+      # a flat config — see eslint.config.example.mjs.
+      # - name: jsx-a11y static lint
+      #   run: npx eslint .
+
+      # If your site needs a build step, run it here so the scan audits what
+      # you actually ship:
+      # - name: Build site
+      #   run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: axe (WCAG 2.1 A/AA, 4 viewports) + keyboard e2e
+        run: npm test
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-playwright-report
+          path: playwright-report/
+          retention-days: 14
