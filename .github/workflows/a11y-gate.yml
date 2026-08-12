@@ -71,3 +71,21 @@ jobs:
           name: a11y-playwright-report
           path: playwright-report/
           retention-days: 14
+
+  # The same axe battery via the packaged action — one step instead of the
+  # job above. If you don't need the keyboard e2e layer (or want the gate in
+  # a repo without Node tooling), THIS is the whole integration. The two jobs
+  # are complementary: the action is axe-only; the job above adds keyboard
+  # operability. This template runs both so you can pick either shape.
+  gate-action:
+    name: a11y gate (packaged action)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: axe (WCAG 2.1 A/AA, 4 viewports) via a11y-gate-action
+        uses: blogcastAI/a11y-gate-action@v0.1.1
+        with:
+          serve-dir: "demo"
+          pages: "/"
+          fail-on: minor

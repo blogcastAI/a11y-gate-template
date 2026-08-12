@@ -5,7 +5,10 @@ WCAG 2.1 A/AA scans at four viewports plus keyboard operability e2e, wired as
 a required GitHub Actions check.
 
 Use the **"Use this template"** button, point the specs at your pages, and
-mark the `gate` job required on your default branch.
+mark the `gate` job required on your default branch. A second job shows the
+same axe battery as a single step via the packaged
+[`blogcastAI/a11y-gate-action`](https://github.com/blogcastAI/a11y-gate-action)
+— use that shape if you don't need the keyboard layer or the Node tooling.
 
 ## What this does NOT do
 
